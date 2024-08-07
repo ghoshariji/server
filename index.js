@@ -44,7 +44,6 @@ const transporter = nodemailer.createTransport({
 });
 
 const sendMail = async (mailContent) => {
-
   let mailOptions = {
     from: '"Arijit-DEV" <arijitghosh1203@gmail.com>',
     to: "arijit1087.be22@chitkarauniversity.edu.in",
@@ -60,7 +59,6 @@ const sendMail = async (mailContent) => {
   }
 };
 
-// Instantiate PriorityQueue
 let pQ = new PriorityQueue();
 
 app.post("/send-mail", async (req, res) => {
@@ -70,20 +68,9 @@ app.post("/send-mail", async (req, res) => {
     if (priority === "otp") {
       pQ.enqueue(mailContent, 0);
     } else if (priority === "promo") {
-      setTimeout(() => {
-        pQ.enqueue(mailContent, 1);
-      }, 5000);
+      pQ.enqueue(mailContent, 1);
     } else {
-      setTimeout(() => {
-        pQ.enqueue(mailContent, 2);
-      }, 10000);
-    }
-
-    // Process the queue and send emails based on priority
-    while (pQ.size() > 0) {
-      let { node: mailToSend } = pQ.dequeue();
-      console.log(mailToSend)
-      await sendMail(mailToSend);
+      pQ.enqueue(mailContent, 2);
     }
 
     res.status(201).send({
@@ -99,6 +86,13 @@ app.post("/send-mail", async (req, res) => {
   }
 });
 
+setInterval(async () => {
+  while (pQ.size() > 0) {
+    let { node: mailToSend } = pQ.dequeue();
+    console.log(mailToSend);
+    await sendMail(mailToSend);
+  }
+}, 3000);
 app.listen(5000, () => {
   console.log("Server started on port 5000");
 });
